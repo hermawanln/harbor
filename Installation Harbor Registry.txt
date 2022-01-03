@@ -1,0 +1,33 @@
+1. Install Docker
+2. Install Docker Engine
+3. Install Docker Compose
+
+#Make Certificate
+sudo mkdir /certs
+cd /certs
+sudo openssl req -sha256 -x509 -days 365 -nodes -newkey rsa:4096 -keyout  harbor.server.local.key -out harbor.server.local.crt
+
+#Download & Extract Harbor 
+wget https://github.com/goharbor/harbor/releases/download/v2.4.1/harbor-offline-installer-v2.4.1.tgz
+tar xzvf harbor-offline-installer-v2.4.1.tgz harbor/
+cd harbor
+cp harbor.yml.tmpl harbor.yml
+sudo nano harbor.yml
+
+update dibawah
+--------------
+hostname: harbor.server.local
+certificate: /certs/harbor.server.local.crt
+private_key: /certs/harbor.server.local.key
+
+#Install Harbor
+sudo ./install.sh --with-notary --with-chartmuseum
+
+#Client Certificate 
+sudo mkdir -p /etc/docker/certs.d/harbor.server.local
+cd /etc/docker/certs.d/harbor.server.local
+sudo cp /certs/harbor.server.local.crt .
+
+#Login Harbor
+sudo docker login harbor.server.local
+
